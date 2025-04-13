@@ -18,6 +18,8 @@
   <h1>Monitor de Sites</h1>
   <label>Intervalo (min): <input type="number" id="intervalo" value="5" min="1" style="width: 60px;"></label>
   <button onclick="startMonitoring()">Iniciar Monitoramento</button>
+  <button onclick="stopMonitoring()">Parar Monitoramento</button>
+  <button onclick="downloadCSV()">📥 Baixar Logs (CSV)</button>
 
   <div class="alerta" id="alerta">🚨 Alerta: Um ou mais sites estão fora do ar!</div>
   <table>
@@ -35,24 +37,27 @@
 
   <script>
     const sites = [
-		"https://www.prevcom.com.br/",
-		"https://www.prevcommt.com.br/",
-		"https://www.prevcommulti.com.br/",
-		"https://www.spprevidencia.com.br/",
-		"https://www.prevcompa.com.br/",
-		"https://www.prevcomro.com.br/",
-		"https://www.previsiemens.com.br/",
-		"https://previp.com.br/",
-		"https://participante.previbayer.com.br/",
-		"https://www.mjds.com.br/"	
+      "https://www.prevcom.com.br/",
+      "https://www.prevcommt.com.br/",
+      "https://www.prevcommulti.com.br/",
+      "https://www.spprevidencia.com.br/",
+      "https://www.prevcompa.com.br/",
+      "https://www.prevcomro.com.br/",
+      "https://www.previsiemens.com.br/",
+      "https://previp.com.br/",
+      "https://participante.previbayer.com.br/",
+      "https://www.mjds.com.br/"	
     ];
 
     let audio = new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
+    let intervaloID = null;
+    let logs = [];
 
     function atualizarStatus() {
       const tabela = document.getElementById("tabela-sites");
       tabela.innerHTML = "";
       let algumForaDoAr = false;
+      const hora = new Date().toLocaleTimeString();
 
       sites.forEach(site => {
         const linha = document.createElement("tr");
@@ -61,18 +66,20 @@
         const cellHora = document.createElement("td");
 
         cellSite.textContent = site;
-        cellHora.textContent = new Date().toLocaleTimeString();
+        cellHora.textContent = hora;
 
         fetch(site, { method: "HEAD", mode: "no-cors" })
           .then(() => {
             cellStatus.textContent = "✅ Online";
             cellStatus.className = "up";
+            adicionarLog(site, "Online", hora);
             linha.append(cellSite, cellStatus, cellHora);
             tabela.appendChild(linha);
           })
           .catch(() => {
             cellStatus.textContent = "❌ Offline";
             cellStatus.className = "down";
+            adicionarLog(site, "Offline", hora);
             linha.append(cellSite, cellStatus, cellHora);
             tabela.appendChild(linha);
             algumForaDoAr = true;
@@ -81,6 +88,22 @@
       });
 
       if (!algumForaDoAr) ocultarAlerta();
+    }
+
+    function adicionarLog(site, status, hora) {
+      logs.push({ site, status, hora });
+    }
+
+    function downloadCSV() {
+      const csvContent = "data:text/csv;charset=utf-8,Site,Status,Hora\n" +
+        logs.map(l => `${l.site},${l.status},${l.hora}`).join("\n");
+
+      const link = document.createElement("a");
+      link.setAttribute("href", encodeURI(csvContent));
+      link.setAttribute("download", `logs_monitoramento_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     function mostrarAlerta() {
@@ -92,13 +115,19 @@
       document.getElementById("alerta").style.display = "none";
     }
 
-    let intervaloID = null;
-
     function startMonitoring() {
       if (intervaloID) clearInterval(intervaloID);
       atualizarStatus();
       const intervalo = parseInt(document.getElementById("intervalo").value) || 5;
       intervaloID = setInterval(atualizarStatus, intervalo * 60 * 1000);
+    }
+
+    function stopMonitoring() {
+      if (intervaloID) {
+        clearInterval(intervaloID);
+        intervaloID = null;
+        alert("Monitoramento parado.");
+      }
     }
   </script>
 </body>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Monitor de Sites</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f7f7f7; }
+    h1 { color: #333; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ccc; }
+    .up { color: green; }
+    .down { color: red; font-weight: bold; }
+    .alerta { background-color: red; color: white; padding: 10px; font-weight: bold; margin-top: 20px; display: none; }
+  </style>
+</head>
+<body>
+  <h1>Monitor de Sites</h1>
+  <label>Intervalo (min): <input type="number" id="intervalo" value="5" min="1" style="width: 60px;"></label>
+  <button onclick="startMonitoring()">Iniciar Monitoramento</button>
+
+  <div class="alerta" id="alerta">🚨 Alerta: Um ou mais sites estão fora do ar!</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Site</th>
+        <th>Status</th>
+        <th>Última Verificação</th>
+      </tr>
+    </thead>
+    <tbody id="tabela-sites">
+      <!-- conteúdo será preenchido dinamicamente -->
+    </tbody>
+  </table>
+
+  <script>
+    const sites = [
+		"https://www.prevcom.com.br/",
+		"https://www.prevcommt.com.br/",
+		"https://www.prevcommulti.com.br/",
+		"https://www.spprevidencia.com.br/",
+		"https://www.prevcompa.com.br/",
+		"https://www.prevcomro.com.br/",
+		"https://www.previsiemens.com.br/",
+		"https://previp.com.br/",
+		"https://participante.previbayer.com.br/",
+		"https://www.mjds.com.br/"	
+    ];
+
+    let audio = new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
+
+    function atualizarStatus() {
+      const tabela = document.getElementById("tabela-sites");
+      tabela.innerHTML = "";
+      let algumForaDoAr = false;
+
+      sites.forEach(site => {
+        const linha = document.createElement("tr");
+        const cellSite = document.createElement("td");
+        const cellStatus = document.createElement("td");
+        const cellHora = document.createElement("td");
+
+        cellSite.textContent = site;
+        cellHora.textContent = new Date().toLocaleTimeString();
+
+        fetch(site, { method: "HEAD", mode: "no-cors" })
+          .then(() => {
+            cellStatus.textContent = "✅ Online";
+            cellStatus.className = "up";
+            linha.append(cellSite, cellStatus, cellHora);
+            tabela.appendChild(linha);
+          })
+          .catch(() => {
+            cellStatus.textContent = "❌ Offline";
+            cellStatus.className = "down";
+            linha.append(cellSite, cellStatus, cellHora);
+            tabela.appendChild(linha);
+            algumForaDoAr = true;
+            mostrarAlerta();
+          });
+      });
+
+      if (!algumForaDoAr) ocultarAlerta();
+    }
+
+    function mostrarAlerta() {
+      document.getElementById("alerta").style.display = "block";
+      audio.play();
+    }
+
+    function ocultarAlerta() {
+      document.getElementById("alerta").style.display = "none";
+    }
+
+    let intervaloID = null;
+
+    function startMonitoring() {
+      if (intervaloID) clearInterval(intervaloID);
+      atualizarStatus();
+      const intervalo = parseInt(document.getElementById("intervalo").value) || 5;
+      intervaloID = setInterval(atualizarStatus, intervalo * 60 * 1000);
+    }
+  </script>
+</body>
+</html>

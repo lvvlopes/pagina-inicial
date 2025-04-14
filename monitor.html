@@ -36,22 +36,22 @@
   </table>
 
   <script>
-    const sites = [
-      "https://www.prevcom.com.br/",
-      "https://www.prevcommt.com.br/",
-      "https://www.prevcommulti.com.br/",
-      "https://www.spprevidencia.com.br/",
-      "https://www.prevcompa.com.br/",
-      "https://www.prevcomro.com.br/",
-      "https://www.previsiemens.com.br/",
-      "https://previp.com.br/",
-      "https://participante.previbayer.com.br/",
-      "https://www.mjds.com.br/"	
-    ];
-
+    let sites = [];
     let audio = new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
     let intervaloID = null;
     let logs = [];
+
+    function carregarSites(callback) {
+      fetch("sites.txt")
+        .then(response => response.text())
+        .then(texto => {
+          sites = texto.split('\n').map(s => s.trim()).filter(s => s);
+          if (callback) callback();
+        })
+        .catch(() => {
+          alert("Erro ao carregar sites.txt");
+        });
+    }
 
     function atualizarStatus() {
       const tabela = document.getElementById("tabela-sites");
@@ -116,10 +116,12 @@
     }
 
     function startMonitoring() {
-      if (intervaloID) clearInterval(intervaloID);
-      atualizarStatus();
-      const intervalo = parseInt(document.getElementById("intervalo").value) || 5;
-      intervaloID = setInterval(atualizarStatus, intervalo * 60 * 1000);
+      stopMonitoring();
+      carregarSites(() => {
+        atualizarStatus();
+        const intervalo = parseInt(document.getElementById("intervalo").value) || 5;
+        intervaloID = setInterval(atualizarStatus, intervalo * 60 * 1000);
+      });
     }
 
     function stopMonitoring() {

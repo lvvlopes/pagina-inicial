@@ -1,101 +1,104 @@
-<script>
-  let sites = [];
-  let audio = new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
-  let intervaloID = null;
-  let logs = [];
-
-  function carregarSites(callback) {
-    fetch("sites.txt")
-      .then(response => response.text())
-      .then(text => {
-        sites = text
-          .split('\n')
-          .map(url => url.trim())
-          .filter(url => url.length > 0);
-        if (callback) callback();
-      })
-      .catch(err => {
-        alert("Erro ao carregar a lista de sites.");
-        console.error(err);
-      });
-  }
-
-  function atualizarStatus() {
-    const tabela = document.getElementById("tabela-sites");
-    tabela.innerHTML = "";
-    let algumForaDoAr = false;
-    const hora = new Date().toLocaleTimeString();
-
-    sites.forEach(site => {
-      const linha = document.createElement("tr");
-      const cellSite = document.createElement("td");
-      const cellStatus = document.createElement("td");
-      const cellHora = document.createElement("td");
-
-      cellSite.textContent = site;
-      cellHora.textContent = hora;
-
-      fetch(site, { method: "HEAD", mode: "no-cors" })
-        .then(() => {
-          cellStatus.textContent = "✅ Online";
-          cellStatus.className = "up";
-          adicionarLog(site, "Online", hora);
-          linha.append(cellSite, cellStatus, cellHora);
-          tabela.appendChild(linha);
-        })
-        .catch(() => {
-          cellStatus.textContent = "❌ Offline";
-          cellStatus.className = "down";
-          adicionarLog(site, "Offline", hora);
-          linha.append(cellSite, cellStatus, cellHora);
-          tabela.appendChild(linha);
-          algumForaDoAr = true;
-          mostrarAlerta();
-        });
-    });
-
-    if (!algumForaDoAr) ocultarAlerta();
-  }
-
-  function adicionarLog(site, status, hora) {
-    logs.push({ site, status, hora });
-  }
-
-  function downloadCSV() {
-    const csvContent = "data:text/csv;charset=utf-8,Site,Status,Hora\n" +
-      logs.map(l => `${l.site},${l.status},${l.hora}`).join("\n");
-
-    const link = document.createElement("a");
-    link.setAttribute("href", encodeURI(csvContent));
-    link.setAttribute("download", `logs_monitoramento_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-  function mostrarAlerta() {
-    document.getElementById("alerta").style.display = "block";
-    audio.play();
-  }
-
-  function ocultarAlerta() {
-    document.getElementById("alerta").style.display = "none";
-  }
-
-  function startMonitoring() {
-    if (intervaloID) clearInterval(intervaloID);
-    carregarSites(() => {
-      atualizarStatus();
-      const intervalo = parseInt(document.getElementById("intervalo").value) || 5;
-      intervaloID = setInterval(atualizarStatus, intervalo * 60 * 1000);
-    });
-  }
-
-  function stopMonitoring() {
-    if (intervaloID) {
-      clearInterval(intervaloID);
-      intervaloID = null;
-      alert("Monitoramento parado.");
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Links Favoritos</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background-color: #000;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 40px 20px;
     }
-  }
-</script>
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      margin-top: 40px;
+      font-size: 1.5em;
+      color: #ddd;
+      border-bottom: 1px solid #333;
+      padding-bottom: 5px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      width: 100%;
+      max-width: 800px;
+      margin-top: 16px;
+    }
+
+    .link-card {
+      background-color: #1a1a1a;
+      padding: 15px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: white;
+      font-size: 1em;
+      font-weight: 500;
+      text-align: center;
+      transition: background-color 0.2s, transform 0.2s;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+
+    .link-card:hover {
+      background-color: #333;
+      transform: translateY(-3px);
+    }
+  </style>
+</head>
+<body>
+  <h1>Links Favoritos</h1>
+
+  <h2>🌐 Comunicação</h2>
+  <div class="links">
+    <a class="link-card" href="https://www.whatsapp.com/?lang=pt_BR" target="_blank">WhatsApp</a>
+    <a class="link-card" href="http://mail.uol.com.br/" target="_blank">Email UOL</a>
+  </div>
+
+  <h2>📚 Estudo de Inglês</h2>
+  <div class="links">
+    <a class="link-card" href="https://www.engvid.com/topic/comprehension/" target="_blank">Videos</a>
+    <a class="link-card" href="https://agendaweb.org/grammar/prepositions-english-exercises.html" target="_blank">Preposition</a>
+    <a class="link-card" href="https://www.newsinlevels.com/" target="_blank">News in Levels</a>
+    <a class="link-card" href="https://www.deepl.com/pt-BR/translator" target="_blank">DeepL Tradutor</a>
+  </div>
+
+  <h2>🤖 Ferramentas de IA</h2>
+  <div class="links">
+    <a class="link-card" href="https://chat.openai.com/" target="_blank">ChatGPT</a>
+    <a class="link-card" href="https://www.blackbox.ai/" target="_blank">Blackbox Programação IA</a>
+    <a class="link-card" href="https://academy.openai.com/home" target="_blank">OpenAI Academy</a>
+  </div>
+
+  <h2>📰 Mídia e Notícias</h2>
+  <div class="links">
+    <a class="link-card" href="https://www.globo.com/" target="_blank">Globo</a>    
+    <a class="link-card" href="https://www.uol.com.br/" target="_blank">UOLa</a>
+    <a class="link-card" href="https://www.youtube.com" target="_blank">YouTube</a>
+  </div>
+
+  <h2>🛠️ Plataformas e Utilidades</h2>
+  <div class="links">
+    <a class="link-card" href="https://www.google.com" target="_blank">Google</a>
+    <a class="link-card" href="https://www.github.com" target="_blank">GitHub</a>
+    <a class="link-card" href="https://hotmart.com/pt-br/club/edicao-de-imagens-com-photoshop/products/3857460" target="_blank">Curso PhotoShop</a>
+    <a class="link-card" href="monitor.html" target="_blank">Monitoramento</a>
+  </div>
+
+</body>
+</html>

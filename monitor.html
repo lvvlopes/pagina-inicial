@@ -34,7 +34,7 @@
           <tr>
             <th>Site</th>
             <th>Status</th>
-            <th>Última Verificação</th>
+            <th>Data e Hora</th>
           </tr>
         </thead>
         <tbody id="tabela-sites">
@@ -69,7 +69,7 @@
       const tabela = document.getElementById("tabela-sites");
       tabela.innerHTML = "";
       let algumForaDoAr = false;
-      const hora = new Date().toLocaleTimeString();
+      const dataHora = new Date().toLocaleString('pt-BR');
 
       sites.forEach(site => {
         const linha = document.createElement("tr");
@@ -77,27 +77,26 @@
         const cellStatus = document.createElement("td");
         const cellHora = document.createElement("td");
 
-        // Cria link clicável
         const link = document.createElement("a");
         link.href = site;
         link.textContent = site;
         link.target = "_blank";
         cellSite.appendChild(link);
 
-        cellHora.textContent = hora;
+        cellHora.textContent = dataHora;
 
         fetch(site, { method: "HEAD", mode: "no-cors" })
           .then(() => {
             cellStatus.textContent = "✅ Online";
             cellStatus.className = "up";
-            adicionarLog(site, "Online", hora);
+            adicionarLog(site, "Online", dataHora);
             linha.append(cellSite, cellStatus, cellHora);
             tabela.appendChild(linha);
           })
           .catch(() => {
             cellStatus.textContent = "❌ Offline";
             cellStatus.className = "down";
-            adicionarLog(site, "Offline", hora);
+            adicionarLog(site, "Offline", dataHora);
             linha.append(cellSite, cellStatus, cellHora);
             tabela.appendChild(linha);
             algumForaDoAr = true;
@@ -108,13 +107,13 @@
       if (!algumForaDoAr) ocultarAlerta();
     }
 
-    function adicionarLog(site, status, hora) {
-      logs.push({ site, status, hora });
+    function adicionarLog(site, status, dataHora) {
+      logs.push({ site, status, dataHora });
     }
 
     function downloadCSV() {
-      const csvContent = "data:text/csv;charset=utf-8,Site,Status,Hora\n" +
-        logs.map(l => `${l.site},${l.status},${l.hora}`).join("\n");
+      const csvContent = "data:text/csv;charset=utf-8,Site,Status,Data e Hora\n" +
+        logs.map(l => `${l.site},${l.status},${l.dataHora}`).join("\n");
 
       const link = document.createElement("a");
       link.setAttribute("href", encodeURI(csvContent));

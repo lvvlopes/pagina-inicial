@@ -77,7 +77,13 @@
         const cellStatus = document.createElement("td");
         const cellHora = document.createElement("td");
 
-        cellSite.textContent = site;
+        // Cria link clicável
+        const link = document.createElement("a");
+        link.href = site;
+        link.textContent = site;
+        link.target = "_blank";
+        cellSite.appendChild(link);
+
         cellHora.textContent = hora;
 
         fetch(site, { method: "HEAD", mode: "no-cors" })

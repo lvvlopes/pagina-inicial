@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English Daily Planner</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div class="max-w-4xl mx-auto py-10 px-4">
+    <h1 class="text-4xl font-bold mb-6 text-center">English Study Planner</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="planner"></div>
+
+    <!-- Notas Semanais -->
+    <div class="col-span-1 md:col-span-2 bg-yellow-100 p-6 rounded-2xl shadow mt-6">
+      <h2 class="text-2xl font-semibold mb-4 text-center">📘 Weekly Notes</h2>
+      <div class="space-y-4">
+        <div>
+          <label class="block font-medium">What I improved this week:</label>
+          <textarea class="w-full p-2 border rounded-md weekly-note" id="improved"></textarea>
+        </div>
+        <div>
+          <label class="block font-medium">Common mistakes I made:</label>
+          <textarea class="w-full p-2 border rounded-md weekly-note" id="mistakes"></textarea>
+        </div>
+        <div>
+          <label class="block font-medium">New vocabulary or expressions:</label>
+          <textarea class="w-full p-2 border rounded-md weekly-note" id="vocab"></textarea>
+        </div>
+        <div>
+          <label class="block font-medium">Goals for next week:</label>
+          <textarea class="w-full p-2 border rounded-md weekly-note" id="goals"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botão de salvar -->
+    <div class="col-span-1 md:col-span-2 flex justify-center mt-6">
+      <button onclick="saveNotes()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-2xl shadow">💾 Save Notes</button>
+    </div>
+
+    <p class="mt-10 text-center text-sm text-gray-600">Created by Vagner's AI-powered English Plan 💬</p>
+  </div>
+
+  <script>
+    const days = [
+      { day: 'Monday', title: 'Listening & Pronunciation', items: [
+        'Watch a short video on <a href="https://www.youtube.com/c/BBCLEARNINGENGLISH" target="_blank" class="text-blue-600 underline">BBC Learning English</a>',
+        'Repeat phrases out loud (shadowing)',
+        'Record yourself reading part of the transcript'] },
+
+      { day: 'Tuesday', title: 'Speaking & Useful Phrases', items: [
+        'Speak on a topic for 2 minutes (record)',
+        'Learn expressions from <a href="https://www.talkenglish.com/speaking/listbasics.aspx" target="_blank" class="text-blue-600 underline">TalkEnglish</a>',
+        'Write variations of 2 phrases'] },
+
+      { day: 'Wednesday', title: 'Grammar', items: [
+        'Study one grammar topic on <a href="https://www.perfect-english-grammar.com/" target="_blank" class="text-blue-600 underline">Perfect English Grammar</a>',
+        'Do 3-5 exercises from <a href="https://agendaweb.org/" target="_blank" class="text-blue-600 underline">Agenda Web</a>',
+        'Write 3 original sentences using the rule'] },
+
+      { day: 'Thursday', title: 'Vocabulary & Phrasal Verbs', items: [
+        'Learn 5 new words + 1 phrasal verb',
+        'Study common phrasal verbs on <a href="https://www.englishclub.com/vocabulary/phrasal-verbs-list.htm" target="_blank" class="text-blue-600 underline">EnglishClub</a>',
+        'Create a mini-story using them',
+        'Speak the story aloud'] },
+
+      { day: 'Friday', title: 'Reading & Interpretation', items: [
+        'Read an article from <a href="https://www.newsinlevels.com/" target="_blank" class="text-blue-600 underline">News in Levels</a>',
+        'Write 3 summary sentences',
+        'Record an explanation in your own words'] },
+
+      { day: 'Saturday', title: 'Weekly Review', items: [
+        'Review notes, recordings, and exercises',
+        'Redo exercises or summarize the week\'s content',
+        'Practice a dialogue using the week\'s vocabulary'] },
+
+      { day: 'Sunday', title: 'Relaxed Practice', items: [
+        'Watch a fun episode with English subtitles',
+        'Enjoy music or games in English',
+        'No pressure – just enjoy!'] },
+    ];
+
+    function createPlanner() {
+      const planner = document.getElementById('planner');
+      days.forEach(({day, title, items}) => {
+        const block = document.createElement('div');
+        block.className = 'bg-white p-6 rounded-2xl shadow';
+        block.innerHTML = `
+          <h2 class="text-2xl font-semibold mb-2">${day} - ${title}</h2>
+          <ul class="list-disc ml-5 space-y-1">${items.map(i => `<li>${i}</li>`).join('')}</ul>
+          <textarea placeholder="Notes for ${day.toLowerCase()}..." class="day-note w-full mt-4 p-2 border rounded-md" data-day="${day.toLowerCase()}"></textarea>
+        `;
+        planner.appendChild(block);
+      });
+    }
+
+    function restoreNotes() {
+      const dayNotes = document.querySelectorAll('.day-note');
+      dayNotes.forEach(note => {
+        note.value = localStorage.getItem(`note-${note.dataset.day}`) || '';
+      });
+
+      const weekly = ['improved', 'mistakes', 'vocab', 'goals'];
+      weekly.forEach(id => {
+        const el = document.getElementById(id);
+        el.value = localStorage.getItem(`weekly-${id}`) || '';
+      });
+    }
+
+    function saveNotes() {
+      const dayNotes = document.querySelectorAll('.day-note');
+      dayNotes.forEach(note => {
+        localStorage.setItem(`note-${note.dataset.day}`, note.value);
+      });
+
+      const weekly = ['improved', 'mistakes', 'vocab', 'goals'];
+      weekly.forEach(id => {
+        const el = document.getElementById(id);
+        localStorage.setItem(`weekly-${id}`, el.value);
+      });
+      alert('Notes saved locally!');
+    }
+
+    window.onload = () => {
+      createPlanner();
+      setTimeout(restoreNotes, 100); // Aguarda planner ser criado
+    }
+  </script>
+</body>
+</html>

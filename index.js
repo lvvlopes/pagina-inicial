@@ -1,24 +1,24 @@
-// index.js
-import express from 'express';
-import fetch from 'node-fetch';
-import cors from 'cors';
+import express from "express";
+import cors from "cors";
+import fetch from "node-fetch";
 
 const app = express();
-app.use(cors()); // permite que qualquer site acesse este backend
+const PORT = process.env.PORT || 3000;
 
-app.get("/verificar", async (req, res) => {
-  const url = req.query.url;
-  if (!url) return res.status(400).json({ error: "URL obrigatória" });
+app.use(cors());
+
+app.get("/check", async (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).send("Missing URL");
 
   try {
     const response = await fetch(url, { method: "HEAD" });
-    res.json({ status: response.status });
-  } catch (err) {
-    res.json({ status: 0, error: "Falha na requisição" });
+    res.status(response.status).send(response.statusText);
+  } catch (error) {
+    res.status(500).send("Erro ao acessar o site");
   }
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
+app.listen(PORT, () => {
+  console.log(`Servidor proxy rodando na porta ${PORT}`);
 });

@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 const app = express();
-const PORT = 8080; 
+const port = 8080; 
 
 // Configuração do CORS para permitir requisições do domínio do GitHub Pages
 const corsOptions = {

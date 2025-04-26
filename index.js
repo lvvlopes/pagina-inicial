@@ -1,36 +1,28 @@
-import express from 'express';
-import cors from 'cors';
+import express from "express";
+import cors from "cors";
+
 const app = express();
-const port = 8080; 
+const PORT = process.env.PORT || 8080;
 
-// Configuração do CORS para permitir requisições do domínio do GitHub Pages
-const corsOptions = {
-  origin: 'https://lvvlopes.github.io/pagina-inicial/', // Substitua pelo domínio do seu GitHub Pages
-  methods: ['GET', 'POST'],
-};
+app.use(cors());
 
-app.use(cors(corsOptions)); // Aplicando a configuração de CORS
+app.get("/ping", async (req, res) => {
+  const url = req.query.url;
 
-// Rota de ping para verificar a disponibilidade de um site
-app.get('/ping', (req, res) => {
-  const { url } = req.query;
-  
-  if (!url) {
-    return res.status(400).json({ error: 'URL não fornecida.' });
+  if (!url) return res.status(400).send("URL ausente");
+
+  try {
+    const response = await fetch(url, { method: "GET" });
+    if (!response.ok) {
+      return res.status(response.status).send("Offline");
+    }
+
+    res.status(200).send("Online");
+  } catch (error) {
+    res.status(500).send("Erro ao tentar acessar o site");
   }
-
-  // Faz a requisição para verificar o status do site
-  fetch(url, { method: 'HEAD', mode: 'no-cors' })
-    .then(() => {
-      return res.json({ status: 'Site verificado', url });
-    })
-    .catch((error) => {
-      console.error('Erro ao verificar o site:', error);
-      return res.status(500).json({ error: 'Erro ao verificar o site.' });
-    });
 });
 
-// Iniciando o servidor na porta 3000
-app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });

@@ -5,7 +5,7 @@ const port = 10000;
 
 // Configuração do CORS para permitir requisições do domínio do GitHub Pages
 const corsOptions = {
-  origin: 'https://lvvlopes.github.io', // Substitua pelo domínio do seu GitHub Pages
+  origin: 'https://lvvlopes.github.io/pagina-inicial/', // Substitua pelo domínio do seu GitHub Pages
   methods: ['GET', 'POST'],
 };
 

@@ -82,7 +82,7 @@
 
         cellHora.textContent = dataHora;
 
-        const proxyUrl = `https://site-monitor-proxy.onrender.com/ping?url=${encodeURIComponent(site)}`;
+        const proxyUrl = `https://site-monitor-proxy.azurewebsites.net/ping?url=${encodeURIComponent(site)}`;
 
         fetch(proxyUrl)
           .then(res => {

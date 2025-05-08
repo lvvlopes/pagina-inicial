@@ -15,7 +15,7 @@ app.get("/ping", async (req, res) => {
   }
 
   try {
-    const response = await fetch(url, { method: 'HEAD', timeout: 5000 });
+    const response = await fetch(url, { method: 'HEAD', timeout: 10000 });
     if (response.ok) {
       res.status(200).send('Online');
     } else {
